@@ -7,3 +7,7 @@ class GenderChoices(models.TextChoices):
     OTHER = "OTHER", "Other"
     NOT_SPECIFIED = "NOT_SPECIFIED", "Not Specified"
     NOT_SET = "NOT_SET", "Not Set"
+
+class RoleChoices(models.TextChoices):
+    RECRUITER = "RECRUITER", "Recruiter"
+    CANDIDATE = "CANDIDATE", "Candidate"
