@@ -1,6 +1,6 @@
-# Intern Backend Project
+# Django Backend Project
 
-A Django REST API backend project for an job platform that connects recruiters with candidates.
+A Django REST API backend project for an Job Listing platform that connects recruiters with candidates.
 
 ## Features
 

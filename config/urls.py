@@ -111,7 +111,7 @@ Good luck! 🚀
 urlpatterns = [
     path("admin/", admin.site.urls),
     # Authentication related URLs
-    path("api/v1/auth", include("auth.rest.urls")),
+    path("api/v1/auth/", include("auth.rest.urls")),
 ]
 
 # Add silk profiler urls
