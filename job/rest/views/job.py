@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from core.permissions import IsRecruiter
-from job.models import Job
+from job.models import Job, JobApplication
 from job.rest.serializers.job import JobSerializer, JobListSerializer
 
 
@@ -85,3 +85,41 @@ class JobViewSet(viewsets.ModelViewSet):
         job.save()
         serializer = self.get_serializer(job)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated, IsRecruiter])
+    def dashboard(self, request):
+        recruiter = request.user
+        
+        # Get job statistics
+        total_published = Job.objects.filter(
+            recruiter=recruiter, 
+            status='PUBLISHED'
+        ).count()
+        
+        total_closed = Job.objects.filter(
+            recruiter=recruiter, 
+            status='CLOSED'
+        ).count()
+
+        # Get application statistics
+        total_applications = JobApplication.objects.filter(
+            job__recruiter=recruiter
+        ).count()
+        
+        total_hired = JobApplication.objects.filter(
+            job__recruiter=recruiter,
+            status='ACCEPTED'
+        ).count()
+        
+        total_rejected = JobApplication.objects.filter(
+            job__recruiter=recruiter,
+            status='REJECTED'
+        ).count()
+
+        return Response({
+            'total_published_jobs': total_published,
+            'total_closed_jobs': total_closed,
+            'total_applications': total_applications,
+            'total_candidates_hired': total_hired,
+            'total_candidates_rejected': total_rejected
+        })
