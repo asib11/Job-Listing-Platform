@@ -205,6 +205,25 @@ POST /api/v1/jobs/{job_uid}/archive/
 Authorization: Bearer <your_token>
 ```
 
+#### 6. Get Recruiter Dashboard Statistics
+
+```http
+GET /api/v1/jobs/dashboard/
+Authorization: Bearer <your_token>
+```
+
+Response:
+
+```json
+{
+  "total_published_jobs": 5,
+  "total_closed_jobs": 2,
+  "total_applications": 25,
+  "total_candidates_hired": 3,
+  "total_candidates_rejected": 8
+}
+```
+
 ### Job Application Endpoints
 
 #### 1. Apply for a Job (Candidates Only)
