@@ -205,6 +205,57 @@ POST /api/v1/jobs/{job_uid}/archive/
 Authorization: Bearer <your_token>
 ```
 
+### Job Application Endpoints
+
+#### 1. Apply for a Job (Candidates Only)
+
+```http
+POST /api/v1/applications/
+Authorization: Bearer <your_token>
+Content-Type: multipart/form-data
+
+{
+    "job": "job_uid",
+    "cover_letter": "I am excited to apply...",
+    "resume": <file>,
+    "expected_salary": 90000,
+    "availability_date": "2024-03-01"
+}
+```
+
+#### 2. List My Applications (Candidates)
+
+```http
+GET /api/v1/applications/
+Authorization: Bearer <your_token>
+```
+
+#### 3. List Job Applications (Recruiters Only)
+
+```http
+GET /api/v1/jobs/{job_uid}/applications/
+Authorization: Bearer <your_token>
+```
+
+#### 4. Get Application Details
+
+```http
+GET /api/v1/applications/{application_uid}/
+Authorization: Bearer <your_token>
+```
+
+#### 5. Update Application Status (Recruiters Only)
+
+```http
+PATCH /api/v1/applications/{application_uid}/
+Authorization: Bearer <your_token>
+Content-Type: application/json
+
+{
+    "status": "ACCEPTED" // or "REJECTED", "UNDER_REVIEW"
+}
+```
+
 ## Models
 
 ### User Model
@@ -245,6 +296,22 @@ class Job(BaseModel):
     applications_count = IntegerField()
 ```
 
+### JobApplication Model
+
+```python
+class JobApplication(BaseModel):
+    job = ForeignKey(Job, related_name='applications')
+    candidate = ForeignKey(User, related_name='job_applications')
+    cover_letter = TextField()
+    status = CharField(choices=ApplicationStatusChoices)
+    resume = FileField(upload_to='resumes/')
+    expected_salary = DecimalField()
+    availability_date = DateField()
+
+    class Meta:
+        unique_together = ('job', 'candidate')
+```
+
 ### UserProfile Model
 
 ```python
@@ -273,6 +340,9 @@ The API implements comprehensive role-based access control:
 - View job details
 - View company information
 - Filter and search jobs
+- Apply for jobs
+- View own job applications
+- Update own job applications
 
 ### 3. Recruiter Permissions
 
@@ -281,7 +351,8 @@ The API implements comprehensive role-based access control:
 - Delete own job postings
 - Manage job status (Draft/Publish/Close/Archive)
 - View all own jobs
-- View job applications
+- View job applications for own jobs
+- Update application status (Accept/Reject/Under Review)
 
 ## Testing
 
