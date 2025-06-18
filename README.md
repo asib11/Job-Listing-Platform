@@ -244,15 +244,15 @@ GET /api/v1/applications/{application_uid}/
 Authorization: Bearer <your_token>
 ```
 
-#### 5. Update Application Status (Recruiters Only)
+#### 5. Change Application Status (Recruiters Only)
 
 ```http
-PATCH /api/v1/applications/{application_uid}/
+POST /api/v1/applications/{application_uid}/change_status/
 Authorization: Bearer <your_token>
 Content-Type: application/json
 
 {
-    "status": "ACCEPTED" // or "REJECTED", "UNDER_REVIEW"
+    "status": "ACCEPTED"  // Valid statuses: PENDING, REVIEWED, SHORTLISTED, REJECTED, ACCEPTED
 }
 ```
 
