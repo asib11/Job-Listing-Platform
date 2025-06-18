@@ -1,6 +1,6 @@
 from rest_framework import serializers
-
 from core.models import User, UserProfile
+from core.choices import RoleChoices
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -8,6 +8,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
+    role = serializers.ChoiceField(choices=RoleChoices.choices, default=RoleChoices.CANDIDATE)
 
     class Meta:
         model = User
@@ -18,6 +19,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "email",
             "password",
             "confirm_password",
+            "role"
         ]
 
     def validate_password(self, value):
