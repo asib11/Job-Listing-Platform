@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
-from core.choices import GenderChoices
+from core.choices import GenderChoices, RoleChoices
 from core.managers import UserManager
 
 from shared.base_model import BaseModel
@@ -19,6 +19,12 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     phone = models.CharField(max_length=15, blank=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    
+    role = models.CharField(
+        max_length=20,
+        choices=RoleChoices.choices,
+        default=RoleChoices.CANDIDATE
+    )
 
     # Add user custom manager
     objects = UserManager()
