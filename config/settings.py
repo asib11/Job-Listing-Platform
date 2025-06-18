@@ -47,6 +47,7 @@ THIRD_PARTY_APPS = [
 ]
 LOCAL_APPS = [
     "core.apps.CoreConfig",
+    "job",
 ]
 
 INSTALLED_APPS = DEFAULT_APPS + THIRD_PARTY_APPS + LOCAL_APPS

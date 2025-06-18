@@ -1,19 +1,34 @@
-# Django Backend Project
+# Job Portal Backend API
 
-A Django REST API backend project for an Job Listing platform that connects recruiters with candidates.
+A comprehensive Django REST Framework based backend for a Job Portal platform that connects recruiters with candidates. Features include role-based authentication, job posting management, and email notifications.
 
-## Features
+## Core Features
 
-- **Role-Based Authentication System**
+### 1. Role-Based Authentication System
 
-  - User roles: Recruiter and Candidate
-  - Role-specific permissions and access control
-  - JWT-based authentication
+- User roles: Recruiter and Candidate
+- JWT-based authentication
+- Role-specific permissions and access control
+- Secure password hashing
+- Email-based password reset
 
-- **Email Notifications**
-  - Welcome emails on registration
-  - Role-specific email content
-  - HTML formatted emails
+### 2. Email Notifications
+
+- Welcome emails on registration
+- Password reset functionality
+- Role-specific email templates
+- HTML formatted emails
+- Secure credential storage in .env
+
+### 3. Job Management
+
+- Complete CRUD operations for job postings
+- Role-based access control
+- Job status management (Draft, Published, Closed, Archived)
+- Comprehensive job details
+- Job type categorization
+- Salary range specification
+- Application tracking
 
 ## Technology Stack
 
@@ -68,50 +83,127 @@ A Django REST API backend project for an Job Listing platform that connects recr
 
 ### Authentication Endpoints
 
-#### Register User
+#### 1. User Registration
 
-- **URL**: `/api/v1/auth/register`
-- **Method**: POST
-- **Request Body**:
-  ```json
-  {
+```http
+POST /api/v1/auth/register/
+Content-Type: application/json
+
+{
     "email": "user@example.com",
     "password": "secure_password",
     "confirm_password": "secure_password",
     "first_name": "John",
     "last_name": "Doe",
-    "role": "CANDIDATE", // or "RECRUITER"
+    "role": "CANDIDATE",  // or "RECRUITER"
     "username": "user@example.com"
-  }
-  ```
-- **Response**: 201 Created
-  ```json
-  {
-    "username": "user@example.com",
-    "first_name": "John",
-    "last_name": "Doe",
+}
+```
+
+#### 2. Get JWT Token
+
+```http
+POST /api/v1/auth/token/
+Content-Type: application/json
+
+{
     "email": "user@example.com",
-    "role": "CANDIDATE"
-  }
-  ```
-
-#### Get Token
-
-- **URL**: `/api/v1/auth/token`
-- **Method**: POST
-- **Request Body**:
-  ```json
-  {
-    "username": "user@example.com",
     "password": "secure_password"
-  }
-  ```
-- **Response**: 200 OK
-  ```json
-  {
-    "token": "your.jwt.token"
-  }
-  ```
+}
+```
+
+#### 3. Password Management
+
+```http
+# Request Password Reset
+POST /api/v1/auth/password/forgot/
+Content-Type: application/json
+
+{
+    "email": "user@example.com"
+}
+
+# Reset Password
+POST /api/v1/auth/password/reset/
+Content-Type: application/json
+
+{
+    "password": "new_password",
+    "confirm_password": "new_password",
+    "token": "reset_token",
+    "uidb64": "user_id_b64"
+}
+```
+
+### Job Management Endpoints
+
+#### 1. List Jobs
+
+```http
+GET /api/v1/jobs/
+Authorization: Bearer <your_token>
+```
+
+#### 2. Create Job (Recruiters Only)
+
+```http
+POST /api/v1/jobs/
+Authorization: Bearer <your_token>
+Content-Type: application/json
+
+{
+    "title": "Senior Python Developer",
+    "description": "Job description...",
+    "job_type": "FULL_TIME",
+    "location": "New York, NY",
+    "salary_min": 80000,
+    "salary_max": 120000,
+    "deadline": "2025-07-18T23:59:59Z",
+    "requirements": "Required skills...",
+    "responsibilities": "Job responsibilities...",
+    "company_name": "Tech Corp",
+    "company_description": "About company...",
+    "experience_required": 5,
+    "skills_required": "Python, Django...",
+    "benefits": "Health insurance..."
+}
+```
+
+#### 3. Get Job Details
+
+```http
+GET /api/v1/jobs/{job_uid}/
+Authorization: Bearer <your_token>
+```
+
+#### 4. Update Job (Recruiters Only)
+
+```http
+PATCH /api/v1/jobs/{job_uid}/
+Authorization: Bearer <your_token>
+Content-Type: application/json
+
+{
+    "title": "Updated Title",
+    ...
+}
+```
+
+#### 5. Job Status Management (Recruiters Only)
+
+```http
+# Publish Job
+POST /api/v1/jobs/{job_uid}/publish/
+Authorization: Bearer <your_token>
+
+# Close Job
+POST /api/v1/jobs/{job_uid}/close/
+Authorization: Bearer <your_token>
+
+# Archive Job
+POST /api/v1/jobs/{job_uid}/archive/
+Authorization: Bearer <your_token>
+```
 
 ## Models
 
@@ -128,6 +220,31 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
     is_superuser = BooleanField(default=False)
 ```
 
+### Job Model
+
+```python
+class Job(BaseModel):
+    title = CharField(max_length=255)
+    description = TextField()
+    recruiter = ForeignKey(User, related_name='posted_jobs')
+    job_type = CharField(choices=JobTypeChoices)
+    location = CharField(max_length=255)
+    salary_min = DecimalField()
+    salary_max = DecimalField()
+    deadline = DateTimeField()
+    requirements = TextField()
+    responsibilities = TextField()
+    status = CharField(choices=JobStatusChoices)
+    company_name = CharField(max_length=255)
+    company_description = TextField()
+    experience_required = IntegerField()
+    skills_required = TextField()
+    benefits = TextField()
+    is_featured = BooleanField()
+    views_count = IntegerField()
+    applications_count = IntegerField()
+```
+
 ### UserProfile Model
 
 ```python
@@ -141,11 +258,30 @@ class UserProfile(BaseModel):
 
 ## Permissions
 
-The API implements role-based access control:
+The API implements comprehensive role-based access control:
 
-- `IsRecruiter`: Allows access only to users with the Recruiter role
-- `IsCandidate`: Allows access only to users with the Candidate role
-- `IsOwnerOrRecruiter`: Allows access to the owner of an object or any recruiter
+### 1. Public Endpoints (No Authentication Required)
+
+- User registration
+- Login (token generation)
+- Password reset request
+- Password reset confirmation
+
+### 2. Candidate Permissions
+
+- View published jobs
+- View job details
+- View company information
+- Filter and search jobs
+
+### 3. Recruiter Permissions
+
+- Create new job postings
+- Edit own job postings
+- Delete own job postings
+- Manage job status (Draft/Publish/Close/Archive)
+- View all own jobs
+- View job applications
 
 ## Testing
 
